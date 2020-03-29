@@ -86,6 +86,46 @@ config OPTIMIZE_LTO
 		will increase overall building time but creates more efficient
 		Unikraft binaries.
 
+config OPTIMIZE_PGO
+	bool "PGO - Profile-guided optimization"
+	default n
+	help
+		Enables GCC to do code optimizations through PGO.
+
+if OPTIMIZE_PGO
+	choice PGO_PHASES
+	prompt "PGO Options"
+	default NO_PGO
+	help
+		Enables GCC to do code optimizations through PGO.
+
+
+	config OPTIMIZE_PGO_GENERATE
+		bool "profile-generate"
+		help
+			Enables GCC to generate data for code optimization through PGO.
+
+	config OPTIMIZE_PGO_USE
+		bool "profile-use"
+		help
+			Enables GCC to do code optimizations using profile-guided
+			accomplished with PGO.
+
+	config NO_PGO
+		bool "NO-PGO"
+		help
+			Do not optimize with PGO.
+
+	endchoice
+
+endif
+
+config OPTIMIZE_ASAN
+	bool "ASAN - AddressSanitizer"
+	default n
+	help
+		Enables GCC to detects memory corruption bugs.
+
 choice
 	prompt "Debug information level"
 	default DEBUG_SYMBOLS_LVL3
