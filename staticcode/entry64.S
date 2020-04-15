@@ -231,6 +231,8 @@ nofsgsbase:
 	/* read multiboot info pointer */
 	popq %rdi
 
+	call _libkvmplat_entry
+
 	cli
 	hlt
 END(_libkvmplat_start64)
@@ -239,7 +241,37 @@ END(_libkvmplat_start64)
 ENTRY(_libkvmplat_entry)
 	push %rbp
 	mov  %rsp,%rbp
-
+	call system_off
 	leaveq
 	retq
 END(_libkvmplat_entry)
+
+ENTRY(system_off)
+	push   %rbp
+	mov    %rsp,%rbp
+	mov    $0x2000,%esi
+	mov    $0x604,%edi
+	callq  outw
+	mov    $0x29,%esi
+	mov    $0x501,%edi
+	callq  outw
+	nop
+	pop    %rbp
+	retq
+END(system_off)
+
+ENTRY(outw)
+	push   %rbp
+   	mov    %rsp,%rbp
+   	sub    $0x8,%rsp
+   	mov    %edi,%edx
+   	mov    %esi,%eax
+   	mov    %dx,-0x4(%rbp)
+   	mov    %ax,-0x8(%rbp)
+   	movzwl -0x8(%rbp),%eax
+   	movzwl -0x4(%rbp),%edx
+   	out    %ax,(%dx)
+   	nop
+   	leaveq
+   	retq
+END(outw)
