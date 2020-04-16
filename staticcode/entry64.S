@@ -238,40 +238,15 @@ nofsgsbase:
 END(_libkvmplat_start64)
 
 .text
-ENTRY(_libkvmplat_entry)
-	push %rbp
-	mov  %rsp,%rbp
-	call system_off
-	leaveq
-	retq
-END(_libkvmplat_entry)
+ENTRY(_libkvmplat_newstack)
+	movq %rdi, %rsp
+	movq %rdx, %rdi
 
-ENTRY(system_off)
-	push   %rbp
-	mov    %rsp,%rbp
-	mov    $0x2000,%esi
-	mov    $0x604,%edi
-	callq  outw
-	mov    $0x29,%esi
-	mov    $0x501,%edi
-	callq  outw
-	nop
-	pop    %rbp
-	retq
-END(system_off)
+	pushq $0x0
+	pushq $0x0
 
-ENTRY(outw)
-	push   %rbp
-   	mov    %rsp,%rbp
-   	sub    $0x8,%rsp
-   	mov    %edi,%edx
-   	mov    %esi,%eax
-   	mov    %dx,-0x4(%rbp)
-   	mov    %ax,-0x8(%rbp)
-   	movzwl -0x8(%rbp),%eax
-   	movzwl -0x4(%rbp),%edx
-   	out    %ax,(%dx)
-   	nop
-   	leaveq
-   	retq
-END(outw)
+	call *%rsi
+
+	cli
+	hlt
+END(_libkvmplat_newstack)
