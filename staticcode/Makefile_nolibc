@@ -1,0 +1,32 @@
+NOLIBCDIR = nolibc
+SRCS = $(wildcard $(NOLIBCDIR)/*.c)
+CMDS = $(patsubst $(NOLIBCDIR)/%.c,$(NOLIBCDIR)/%.o,$(SRCS))
+
+all: $(CMDS) link obj_copy
+
+$(NOLIBCDIR)/%.o: $(NOLIBCDIR)/%.c
+	gcc   -nostdinc -nostdlib -U __linux__ -U __FreeBSD__ -U __sun__  \
+	-I./include -Iplat/kvm/include/kvm -Inolibc/include \
+	-fno-stack-protector -fno-omit-frame-pointer -fno-tree-sra -Wall -Wextra \
+	-D __Unikraft__ -DUK_CODENAME="Rhea" -DUK_VERSION=0.4 -DUK_FULLVERSION=0.4.0~0453b2e \
+	-O0 -fno-optimize-sibling-calls -fno-tree-vectorize -no-pie -D__X86_64__ -m64 -mno-red-zone \
+	-fno-reorder-blocks -fno-asynchronous-unwind-tables  -mtune=generic  -DCC_VERSION=7.5 \
+	-fno-builtin-printf -fno-builtin-fprintf -fno-builtin-sprintf -fno-builtin-snprintf \
+	-fno-builtin-vprintf -fno-builtin-vfprintf -fno-builtin-vsprintf -fno-builtin-vsnprintf \
+	-fno-builtin-scanf -fno-builtin-fscanf -fno-builtin-sscanf -fno-builtin-vscanf \
+	-fno-builtin-vfscanf -fno-builtin-vsscanf -g3 -D__LIBNAME__=libnolibc \
+	-D__BASENAME__=$(subst $(NOLIBCDIR)/,,$<) \
+	-c $< \
+	-o build/libnolibc/$(subst $(NOLIBCDIR)/,,$@) \
+	-Wp,-MD,build/libnolibc/.$(subst $(NOLIBCDIR)/,,$@).d \
+
+link:
+	gcc -nostdinc -nostdlib -Wl,--omagic -Wl,-r -Wl,-d -Wl,--build-id=none -no-pie \
+	$(patsubst $(NOLIBCDIR)/%.o,build/libnolibc/%.o,$(CMDS)) \
+	-Wl,--start-group -Wl,--end-group -o build/libnolibc.ld.o
+
+obj_copy:
+	objcopy --keep-global-symbols=nolibc/exportsyms.uk -w -L __* build/libnolibc.ld.o build/libnolibc.o
+
+clean:
+	rm -rf build/libnolibc/* build/libnolibc.ld.o build/libnolibc.o

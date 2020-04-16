@@ -21,6 +21,16 @@ final_link:
 	gcc  -nostdinc -nostdlib -Wl,--omagic -Wl,--build-id=none  -no-pie  -Wl,-m,elf_x86_64 -Wl,-dT,link64.lds \
 	-Wl,-T,ukdebug/extra.ld -Wl,-T,vfscore/extra.ld  static_kernel.o -o static_kernel.dbg
 
+setup:
+	gcc -I./include -I./nolibc/include -I./plat/kvm/include -nostdinc -nostdlib -U __linux__ -U __FreeBSD__ -U __sun__ -fno-stack-protector -fno-omit-frame-pointer \
+	-fno-tree-sra -Wall -Wextra -D __Unikraft__ -DUK_CODENAME="Rhea" -DUK_VERSION=0.4 -DUK_FULLVERSION=0.4.0~62c61a7 \
+	-O0 -fno-optimize-sibling-calls -fno-tree-vectorize -no-pie -D__X86_64__ -m64 -mno-red-zone -fno-reorder-blocks \
+	-fno-asynchronous-unwind-tables  -mtune=generic  -DCC_VERSION=7.5  -fno-builtin-printf -fno-builtin-fprintf \
+	-fno-builtin-sprintf -fno-builtin-snprintf -fno-builtin-vprintf -fno-builtin-vfprintf -fno-builtin-vsprintf \
+	-fno-builtin-vsnprintf -fno-builtin-scanf -fno-builtin-fscanf -fno-builtin-sscanf -fno-builtin-vscanf \
+	-fno-builtin-vfscanf -fno-builtin-vsscanf -DKVMPLAT       -g3 -D__LIBNAME__=libkvmplat -D__BASENAME__=setup.c \
+	-c setup.c -o setup.o -Wp,-MD,.setup.o.d
+
 run:
 	sudo qemu-system-x86_64 -enable-kvm -nographic -device isa-debug-exit -kernel $(exec)
 
@@ -29,4 +39,4 @@ run_gdb:
 
 clean:
 	rm -rf .entry64.o.d entry64.o entry1 entry2 entry3 entry4 link64.lds .link64.lds.d \
-	static_kernel.*
+	static_kernel.* setup.o
