@@ -144,9 +144,9 @@ nolib:
 
 run:
 	sudo qemu-system-x86_64 -enable-kvm -nographic -device isa-debug-exit -kernel $(exec)
-
 run_gdb:
-	sudo qemu-system-x86_64 -s -S -cpu host -enable-kvm -m 128 -nodefaults -no-acpi -display none -serial stdio -device isa-debug-exit -kernel $(exec) -append verbose
+	sudo qemu-system-x86_64 -s -S -cpu host -enable-kvm -m 128 -nodefaults -no-acpi -display none \
+	-serial stdio -device isa-debug-exit -kernel $(exec) -append verbose
 
 clean:
 	rm -rf *.o .*.o.d link64.lds .link64.lds.d static_kernel.*

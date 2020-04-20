@@ -58,13 +58,21 @@ struct kvmplat_config _libkvmplat_cfg = { 0 };
 extern void _libkvmplat_newstack(uintptr_t stack_start, void (*tramp)(void *),
 				 void *arg);
 
+
 void _libkvmplat_entry(void *arg)
 {
 	struct multiboot_info *mi = (struct multiboot_info *)arg;
 
+	_libkvmplat_init_console();
+
 	uk_pr_info("Entering from KVM (x86)...\n");
 	uk_pr_info("     multiboot: %p\n", mi);
 
-	ukplat_terminate(UKPLAT_HALT);
+	/*
+	 * The multiboot structures may be anywhere in memory, so take a copy of
+	 * everything necessary before we initialise memory allocation.
+	 */
 
+	ukplat_terminate(UKPLAT_HALT);
 }
+
